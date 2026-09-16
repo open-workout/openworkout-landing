@@ -7,18 +7,27 @@ on:
 
 jobs:
   ftp-deploy:
-    name: Upload to FTP
+    name: Build and upload to FTP
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Optional: build step (uncomment if needed)
-      # - name: Build site
-      #   run: |
-      #     npm install
-      #     npm run build
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/web
+        run: npm ci
+
+      - name: Build
+        working-directory: apps/web
+        run: npm run build
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -28,5 +37,5 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT || 21 }}
           protocol: ftp
-          local-dir: ./   # or ./dist/ or ./build/ if you have a build output
-          server-dir: /   # change to your target directory on the server
+          local-dir: ./apps/web/dist/
+          server-dir: /

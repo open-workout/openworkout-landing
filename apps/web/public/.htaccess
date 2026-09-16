@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# Don't rewrite existing files/directories (assets, etc.)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Send everything else to index.html for client-side routing
+RewriteRule ^ index.html [L]
