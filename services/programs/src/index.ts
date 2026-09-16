@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import Fastify from 'fastify'
-import { checkDbConnection } from './db.js'
+import { checkDbConnection, ensureSchema } from './db.js'
 import programsRoutes from './routes/programs.js'
 
 const app = Fastify({ logger: true })
@@ -13,4 +13,12 @@ app.get('/health', async () => {
 app.register(programsRoutes)
 
 const port = Number(process.env.PORT) || 3001
-app.listen({ port, host: '0.0.0.0' })
+
+async function start() {
+  await ensureSchema().catch((err) => {
+    app.log.error(err, 'failed to ensure schema')
+  })
+  await app.listen({ port, host: '0.0.0.0' })
+}
+
+start()
